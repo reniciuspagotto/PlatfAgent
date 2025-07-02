@@ -1,221 +1,78 @@
+dotnet run
+dotnet restore
+dotnet build
+dotnet run --project src/PlatfAgent.Console
 # PlatfAgent - Azure OpenAI Console Agent
 
-A clean console application for chatting with Azure OpenAI using the official Azure SDK.
+A minimal console application for chatting with Azure OpenAI using the official Azure SDK.
 
 ## What You Need
 
 From your Azure OpenAI resource:
-- **Endpoint URL** (e.g., `https://your-resource.openai.azure.com/`)  
-- **API Key** 
+- **Endpoint URL** (e.g., `https://your-resource.openai.azure.com/`)
+- **API Key**
 - **Deployment name** (the name you gave your model deployment in Azure)
 
 ## Quick Setup
 
-Set these environment variables in your macOS bash:
+Update `src/PlatfAgent.Console/appsettings.json` with your Azure OpenAI details:
 
-```bash
-export AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com/"
-export AZURE_OPENAI_KEY="your-api-key-here"
-export AZURE_OPENAI_DEPLOYMENT="your-deployment-name"  # e.g., "gpt-4", "gpt-35-turbo"
+```json
+{
+  "AzureOpenAI": {
+    "Endpoint": "https://your-resource.openai.azure.com/",
+    "Key": "your-api-key-here",
+    "Deployment": "your-deployment-name"
+  }
+}
 ```
 
 ## Usage
 
 ```bash
 cd src/PlatfAgent.Console
+# (Optional) Set environment variables to override config
+# export AZURE_OPENAI_ENDPOINT=...
+# export AZURE_OPENAI_KEY=...
+# export AZURE_OPENAI_DEPLOYMENT=...
 dotnet run
 ```
-
-## Architecture (Clean & Simple)
-
-```
-📁 src/PlatfAgent.Console/
-├── 🎯 Program.cs              # Entry point & config (70 lines)
-├── 🤖 SimpleAIAgent.cs        # AI communication using Azure SDK (60 lines)  
-├── 💬 ConsoleInterface.cs     # UI utilities (55 lines)
-└── ⚙️ appsettings.json        # Optional config backup
-```
-
-### What Each Class Does:
-
-- **`Program`**: Loads config, creates agent, runs chat loop
-- **`SimpleAIAgent`**: Uses official Azure.AI.OpenAI SDK for reliable communication  
-- **`ConsoleInterface`**: Handles console input/output, commands
-
-## Key Features ✨
-
-✅ **Official Azure SDK** - Uses `Azure.AI.OpenAI` package for reliability  
-✅ **Environment Variables** - Secure credential management  
-✅ **Conversation History** - Maintains context across messages  
-✅ **Simple Commands** - help, clear, exit  
-✅ **Clean Architecture** - Well-separated concerns  
-✅ **Error Handling** - Graceful error recovery
-
-## Commands
-
-- `help` - Show available commands
-- `clear` - Clear conversation history  
-- `exit` - Exit application
-
-## Why This Approach?
-
-- **Reliable**: Uses Microsoft's official SDK instead of raw HTTP calls
-- **Secure**: Credentials via environment variables
-- **Simple**: Minimal complexity while maintaining good architecture
-- **Maintainable**: Official SDK handles API changes and improvements
-
-## Total: ~185 lines of clean, production-ready code! 🎉
-- 📝 Configurable AI parameters (temperature, max tokens, system prompt)
-- 🔧 Environment variable support for secure configuration
-- 📋 Built-in help system and commands
-
-## Prerequisites
-
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- Azure OpenAI Service account with:
-  - Azure OpenAI endpoint URL
-  - API key
-  - Deployed model (e.g., GPT-4o)
-
-## Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/reniciuspagotto/PlatfAgent.git
-cd PlatfAgent
-```
-
-### 2. Configure Azure OpenAI
-
-Update the `src/PlatfAgent.Console/appsettings.json` file with your Azure OpenAI details:
-
-```json
-{
-  "AzureOpenAI": {
-    "Endpoint": "https://your-openai-endpoint.openai.azure.com/",
-    "ApiKey": "your-api-key-here",
-    "DeploymentName": "your-deployment-name",
-    "ModelName": "gpt-4o"
-  },
-  "Agent": {
-    "SystemPrompt": "You are a helpful AI agent. Provide clear, concise, and accurate responses to user questions.",
-    "MaxTokens": 1000,
-    "Temperature": 0.7
-  }
-}
-```
-
-**Alternative**: Use environment variables for secure configuration:
-- `AzureOpenAI__Endpoint`
-- `AzureOpenAI__ApiKey`
-- `AzureOpenAI__DeploymentName`
-- `AzureOpenAI__ModelName`
-
-### 3. Build and run
-
-```bash
-# Restore dependencies
-dotnet restore
-
-# Build the solution
-dotnet build
-
-# Run the console application
-dotnet run --project src/PlatfAgent.Console
-```
-
-## Usage
-
-Once the application starts, you'll see a welcome screen. Simply type your questions or messages and press Enter to interact with the AI agent.
-
-### Available Commands
-
-- `help` - Show available commands and tips
-- `clear` - Clear the console screen
-- `exit`, `quit`, or `bye` - Exit the application
-
-### Example Interaction
-
-```
-🤖 You: What is artificial intelligence?
-🤖 Agent: Artificial intelligence (AI) refers to the simulation of human intelligence in machines...
-
-🤖 You: Can you explain it more simply?
-🤖 Agent: Sure! AI is basically teaching computers to think and make decisions like humans do...
-```
-
-## Configuration Options
-
-### Azure OpenAI Settings
-
-- **Endpoint**: Your Azure OpenAI service endpoint
-- **ApiKey**: Your Azure OpenAI API key
-- **DeploymentName**: The name of your deployed model
-- **ModelName**: The model name (e.g., "gpt-4o", "gpt-35-turbo")
-
-### Agent Settings
-
-- **SystemPrompt**: The initial system message that defines the AI's behavior
-- **MaxTokens**: Maximum number of tokens in the response (default: 1000)
-- **Temperature**: Controls randomness in responses (0.0-2.0, default: 0.7)
 
 ## Project Structure
 
 ```
-PlatfAgent/
-├── src/
-│   └── PlatfAgent.Console/
-│       ├── Configuration/
-│       │   └── AppConfiguration.cs
-│       ├── Services/
-│       │   ├── IAIAgentService.cs
-│       │   └── AIAgentService.cs
-│       ├── ConsoleApp.cs
-│       ├── Program.cs
-│       ├── appsettings.json
-│       └── PlatfAgent.Console.csproj
-├── PlatfAgent.sln
-└── README.md
+📁 src/PlatfAgent.Console/
+├── Program.cs           # Entry point & config
+├── SimpleAIAgent.cs     # AI communication using Azure SDK
+├── ConsoleInterface.cs  # UI utilities
+└── appsettings.json     # Configuration
 ```
 
-## Dependencies
+## Features
 
-- **Azure.AI.OpenAI** (2.1.0) - Azure OpenAI client library
-- **Microsoft.Extensions.Configuration** (9.0.0) - Configuration management
-- **Microsoft.Extensions.DependencyInjection** (9.0.0) - Dependency injection
-- **Microsoft.Extensions.Hosting** (9.0.0) - Host builder and application lifetime management
-- **Microsoft.Extensions.Logging** (9.0.0) - Logging framework
+- Uses official Azure.AI.OpenAI SDK
+- Loads config from appsettings.json (or environment variables)
+- Maintains conversation history
+- Simple commands: help, clear, exit
+- Graceful error handling
 
-## Contributing
+## Commands
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- `help`   - Show available commands
+- `clear`  - Clear conversation history
+- `exit`   - Exit application
 
-## License
+## Prerequisites
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- Azure OpenAI Service account with endpoint, API key, and deployed model
 
 ## Troubleshooting
 
-### Common Issues
+- Ensure your endpoint, API key, and deployment name are correct
+- If you change `appsettings.json` while the app is running, restart the app to reload config
+- For errors, check the console output for details
 
-1. **"Azure OpenAI API request failed"**
-   - Verify your endpoint URL is correct
-   - Check that your API key is valid
-   - Ensure your deployment name matches the actual deployment
+## License
 
-2. **"An unexpected error occurred"**
-   - Check the console logs for detailed error information
-   - Verify your .NET 9 SDK installation
-   - Ensure all NuGet packages are properly restored
-
-3. **Configuration not loading**
-   - Verify the `appsettings.json` file is in the correct location
-   - Check that the JSON syntax is valid
-   - Ensure environment variables are properly set if using them
-
-For more help, please open an issue in the GitHub repository.
+MIT
