@@ -1,13 +1,70 @@
-# PlatfAgent
+# PlatfAgent - Azure OpenAI Console Agent
 
-An AI-powered console agent built with .NET 9 and Azure OpenAI that provides interactive conversational AI capabilities through a command-line interface.
+A clean console application for chatting with Azure OpenAI using the official Azure SDK.
 
-## Features
+## What You Need
 
-- 🤖 Interactive AI conversations using Azure OpenAI
-- 💬 Maintains conversation context throughout the session
-- ⚡ Real-time responses with typing indicators
-- 🎨 Clean, user-friendly console interface
+From your Azure OpenAI resource:
+- **Endpoint URL** (e.g., `https://your-resource.openai.azure.com/`)  
+- **API Key** 
+- **Deployment name** (the name you gave your model deployment in Azure)
+
+## Quick Setup
+
+Set these environment variables in your macOS bash:
+
+```bash
+export AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com/"
+export AZURE_OPENAI_KEY="your-api-key-here"
+export AZURE_OPENAI_DEPLOYMENT="your-deployment-name"  # e.g., "gpt-4", "gpt-35-turbo"
+```
+
+## Usage
+
+```bash
+cd src/PlatfAgent.Console
+dotnet run
+```
+
+## Architecture (Clean & Simple)
+
+```
+📁 src/PlatfAgent.Console/
+├── 🎯 Program.cs              # Entry point & config (70 lines)
+├── 🤖 SimpleAIAgent.cs        # AI communication using Azure SDK (60 lines)  
+├── 💬 ConsoleInterface.cs     # UI utilities (55 lines)
+└── ⚙️ appsettings.json        # Optional config backup
+```
+
+### What Each Class Does:
+
+- **`Program`**: Loads config, creates agent, runs chat loop
+- **`SimpleAIAgent`**: Uses official Azure.AI.OpenAI SDK for reliable communication  
+- **`ConsoleInterface`**: Handles console input/output, commands
+
+## Key Features ✨
+
+✅ **Official Azure SDK** - Uses `Azure.AI.OpenAI` package for reliability  
+✅ **Environment Variables** - Secure credential management  
+✅ **Conversation History** - Maintains context across messages  
+✅ **Simple Commands** - help, clear, exit  
+✅ **Clean Architecture** - Well-separated concerns  
+✅ **Error Handling** - Graceful error recovery
+
+## Commands
+
+- `help` - Show available commands
+- `clear` - Clear conversation history  
+- `exit` - Exit application
+
+## Why This Approach?
+
+- **Reliable**: Uses Microsoft's official SDK instead of raw HTTP calls
+- **Secure**: Credentials via environment variables
+- **Simple**: Minimal complexity while maintaining good architecture
+- **Maintainable**: Official SDK handles API changes and improvements
+
+## Total: ~185 lines of clean, production-ready code! 🎉
 - 📝 Configurable AI parameters (temperature, max tokens, system prompt)
 - 🔧 Environment variable support for secure configuration
 - 📋 Built-in help system and commands

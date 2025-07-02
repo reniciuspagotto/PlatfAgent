@@ -1,11 +1,4 @@
-using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using PlatfAgent.Console.Configuration;
-using PlatfAgent.Console.Services;
-using Azure;
 
 namespace PlatfAgent.Console;
 
@@ -13,52 +6,79 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        // Build configuration
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
-
-        // Create host builder
-        var host = Host.CreateDefaultBuilder(args)
-            .ConfigureServices((context, services) =>
-            {
-                // Configure options
-                services.Configure<AzureOpenAIConfiguration>(configuration.GetSection("AzureOpenAI"));
-                services.Configure<AgentConfiguration>(configuration.GetSection("Agent"));
-
-                // Register Azure OpenAI client
-                var azureOpenAIConfig = configuration.GetSection("AzureOpenAI").Get<AzureOpenAIConfiguration>();
-                if (azureOpenAIConfig != null)
-                {
-                    services.AddSingleton(provider =>
-                    {
-                        return new OpenAIClient(new Uri(azureOpenAIConfig.Endpoint), new AzureKeyCredential(azureOpenAIConfig.ApiKey));
-                    });
-                }
-
-                // Register services
-                services.AddScoped<IAIAgentService, AIAgentService>();
-                services.AddScoped<ConsoleApp>();
-            })
-            .ConfigureLogging(logging =>
-            {
-                logging.ClearProviders();
-                logging.AddConsole();
-            })
-            .Build();
-
-        // Run the console application
         try
         {
-            var app = host.Services.GetRequiredService<ConsoleApp>();
-            await app.RunAsync();
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+            
+            var agent = CreateAIAgent(config);
+            await RunChatAsync(agent);
         }
         catch (Exception ex)
         {
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "Application terminated unexpectedly");
+            ConsoleInterface.ShowError($"Fatal error: {ex.Message}");
+            if (!System.Console.IsInputRedirected)
+            {
+                System.Console.WriteLine("Press any key to exit...");
+                System.Console.ReadKey();
+            }
+        }
+    }
+
+    private static SimpleAIAgent CreateAIAgent(IConfiguration config)
+    {
+        var endpoint = config["AzureOpenAI:Endpoint"] 
+            ?? throw new InvalidOperationException("Azure OpenAI endpoint not configured.");
+        
+        var apiKey = config["AzureOpenAI:Key"] 
+            ?? throw new InvalidOperationException("Azure OpenAI API key not configured.");
+        
+        var deploymentName = config["AzureOpenAI:Deployment"] ?? "gpt-4";
+        var systemPrompt = config["AzureOpenAI:SystemPrompt"] ?? "You are a helpful AI agent.";
+
+        return new SimpleAIAgent(endpoint, apiKey, deploymentName, systemPrompt);
+    }
+
+    private static async Task RunChatAsync(SimpleAIAgent agent)
+    {
+        ConsoleInterface.DisplayWelcome();
+
+        while (true)
+        {
+            var userInput = ConsoleInterface.GetUserInput();
+            if (string.IsNullOrWhiteSpace(userInput)) continue;
+
+            if (ConsoleInterface.IsCommand(userInput, "exit", "quit", "bye"))
+            {
+                ConsoleInterface.DisplayGoodbye();
+                break;
+            }
+
+            if (ConsoleInterface.IsCommand(userInput, "help", "?"))
+            {
+                ConsoleInterface.DisplayHelp();
+                continue;
+            }
+
+            if (ConsoleInterface.IsCommand(userInput, "clear", "cls"))
+            {
+                agent.ClearHistory();
+                ConsoleInterface.DisplayWelcome();
+                continue;
+            }
+
+            try
+            {
+                ConsoleInterface.ShowThinking();
+                var response = await agent.GetResponseAsync(userInput);
+                ConsoleInterface.ShowResponse(response);
+            }
+            catch (Exception ex)
+            {
+                ConsoleInterface.ShowError(ex.Message);
+            }
         }
     }
 }
